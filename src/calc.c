@@ -62,7 +62,7 @@ int main(int argc, char **argv)
   gtk_window_set_title(GTK_WINDOW(window),"Calc");
   gtk_container_set_border_width(GTK_CONTAINER(window),15);
   gtk_window_set_resizable(GTK_WINDOW(window),TRUE);
-  gtk_window_set_icon(GTK_WINDOW(window), create_pixbuf("../img/icon.png"));
+  gtk_window_set_icon(GTK_WINDOW(window), create_pixbuf("../img/calculator.png"));
   g_signal_connect(G_OBJECT(window),"delete_event",G_CALLBACK(gtk_main_quit),NULL);
 
   vbox = create_table();
