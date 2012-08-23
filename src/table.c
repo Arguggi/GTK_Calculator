@@ -16,6 +16,12 @@ void append_to_label(GtkWidget *widget,gpointer data)
   gint label_lenght=0;
   
   label_lenght = strlen(gtk_label_get_text(GTK_LABEL(data)));
+
+  if(!strncmp(gtk_label_get_text(GTK_LABEL(data)),"Invalid expression",sizeof(gchar)*label_lenght)){
+    cancel_label(widget,data);
+    label_lenght = 0;
+  }
+
   if(label_lenght < LABEL_LEN-1){
   strncpy(label_text,gtk_label_get_text(GTK_LABEL(data)),sizeof(gchar)*(LABEL_LEN-1));
   strncpy((label_text+label_lenght),gtk_button_get_label(GTK_BUTTON(widget)),(sizeof(gchar)*((LABEL_LEN-1)-label_lenght)));
@@ -74,7 +80,7 @@ void calc_eq(gchar *expression, eq_result *result)
     }
   }
 
-  if(paren != 0){ /* Check for valid parenthesis */
+  if(paren != 0 || 1 == 1){ /* Check for valid parenthesis */
     result->valid = 0;
     return;
   }
