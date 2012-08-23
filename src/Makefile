@@ -1,6 +1,6 @@
 PKG = `pkg-config --libs --cflags gtk+-2.0`
 CC = gcc
-CFLAGS = -Wdeprecated-declarations -Wall -Wextra -pedantic -std=c99
+CFLAGS = -Wdeprecated-declarations -Wall
 OBJ = calc.o table.o icon.o
 
 calc : $(OBJ)
