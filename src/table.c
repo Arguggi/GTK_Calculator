@@ -2,8 +2,29 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <math.h>
 #include "table.h"
 #define LABEL_LEN 10
+
+static void square_root(GtkWidget *widget,gpointer data)
+{
+  gdouble text=0,result=0;
+  gchar label_text[LABEL_LEN]="";
+  gint label_lenght=0;
+
+  label_lenght = strlen(gtk_label_get_text(GTK_LABEL(data)));
+
+  if(label_lenght){
+    text = atof(gtk_label_get_text(GTK_LABEL(data)));
+    if (text > 0){
+      result = sqrt(text);
+      sprintf(label_text,"%f",result);
+      gtk_label_set_text(GTK_LABEL(data),label_text);
+    } else {
+      gtk_label_set_text(GTK_LABEL(data),"Input is not positive");
+    }
+  }
+}
 
 void cancel_label(GtkWidget *widget,gpointer data)
 {
@@ -60,6 +81,7 @@ GtkWidget *create_table(void)
         strncpy(string,"SQRT\0",sizeof(gchar)*5);
         button = gtk_button_new_with_label(string);
         gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
+        g_signal_connect(button,"clicked",G_CALLBACK(square_root),label);
       } else {                                /*Reset button*/
         strncpy(string,"DEL\0",sizeof(gchar)*5);
         button = gtk_button_new_with_label(string);
