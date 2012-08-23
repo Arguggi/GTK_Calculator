@@ -22,28 +22,89 @@ void append_to_label(GtkWidget *widget,gpointer data)
   gtk_label_set_text(GTK_LABEL(data),label_text);
   } else return;
 }
-void calc_eq(gchar *expressioni, eq_result *result)
+
+static gboolean numbers_left_right(gchar *expression,gint index)
 {
-  result->result = 10;
-  result->valid = 1;
+  if(index != 0 && index+1 < strlen(expression)){ /* Check for index of first and last place */
+    g_print("index:%d\n",index);
+    if (isdigit(expression[index-1] && isdigit(expression[index+1])))
+      return TRUE;
+    else return FALSE;
+  } 
+  else return FALSE;
 }
+
+void calc_eq(gchar *expression, eq_result *result)
+{
+  int i=0,operator=0,number=0,paren=0,point=0,paren_index;
+  gchar oper_list[20],num_list[40],paren_list[10];
+  
+  if (!result->valid){
+    return;
+  }
+
+  for(i=0;i<strlen(expression);++i){
+    if(isdigit(expression[i])){ /* Check for number */
+        num_list[number++] = expression[i];
+        g_print("i:%d\n",i);
+        continue;
+    } else if (ispunct(expression[i])){ /* Check operators ()/+-*. */
+      if(numbers_left_right(expression,i)){
+        if (expression[i] == '('){
+          paren++;
+          paren_list[paren_index++] = expression[i];
+          continue;
+        } else if (expression[i] == ')'){
+          paren--;
+          paren_list[paren_index++] = expression[i];
+          continue;
+        } else if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/'){
+          oper_list[operator++] = expression[i];
+          continue;
+        } else if (expression[i] == '.'){
+          point++;
+          continue;
+        }
+      else {
+        result->valid = 0;
+        g_print("valid?:%d",result->valid);
+        return;
+      }
+      }
+    }
+  }
+
+  if(paren != 0){ /* Check for valid parenthesis */
+    result->valid = 0;
+    return;
+  }
+
+  result->result = 10;
+}
+
 void parse_equation(GtkWidget *widget,gpointer data)
 {
   gchar label_text[LABEL_LEN] = "\0";
-  eq_result result;
+  eq_result *result=NULL;
 
+  result = g_malloc(sizeof(eq_result));
+
+  result->valid = 1;
+  result->result = 0;
 
   strncpy(label_text,gtk_label_get_text(GTK_LABEL(data)),sizeof(gchar)*(LABEL_LEN-1));
 
-  calc_eq(label_text,&result);
+  calc_eq(label_text,result);
 
-  if(result.valid){
-    snprintf(label_text,sizeof(gchar)*LABEL_LEN,"%d",result.result);
+  g_print("\nAFTER CALC %d\n",result->valid);
+  if(result->valid){
+    snprintf(label_text,sizeof(gchar)*LABEL_LEN,"%d",result->result);
     gtk_label_set_text(GTK_LABEL(data),label_text);
   } else {
     gtk_label_set_text(GTK_LABEL(data),"Invalid expression");
   }
 
+  g_free(result);
 }
   
 GtkWidget *create_table(void)
@@ -51,12 +112,19 @@ GtkWidget *create_table(void)
   const gchar table_buttons[4][5] = {{"789()"},{"456+-"},{"123*/"},{"0.SD="}};
   gint i=0,j=0;
   gchar string[5];
-  GtkWidget *table, *button, *label;
+  GtkWidget *table, *button, *label, *frame;
   
   table = gtk_table_new(5,5,TRUE);
   label = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(label),1,0.5);
-  gtk_table_attach_defaults(GTK_TABLE(table),label,0,5,0,1);
+
+  frame = gtk_frame_new(NULL);
+  gtk_frame_set_shadow_type(GTK_FRAME(frame),GTK_SHADOW_IN);
+
+  gtk_container_add(GTK_CONTAINER(frame),label);
+
+
+  gtk_table_attach_defaults(GTK_TABLE(table),frame,0,5,0,1);
 
   
   for(j=0;j<4;++j){
