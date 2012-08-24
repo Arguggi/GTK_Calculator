@@ -28,7 +28,7 @@ void square_root(GtkWidget *widget,gpointer data)
       sprintf(label_text,"%.3f",result);
       gtk_label_set_text(GTK_LABEL(data),label_text);
     } else {
-      gtk_label_set_text(GTK_LABEL(data),"Input is not positive");
+      gtk_label_set_text(GTK_LABEL(data),"Invalid expression");
     }
   }
 }
@@ -46,7 +46,7 @@ void square(GtkWidget *widget,gpointer data)
     if(text < sqrt(DBL_MAX)){
         text = text*text;
     } else {
-      gtk_label_set_text(GTK_LABEL(data),"Input is too large");
+      gtk_label_set_text(GTK_LABEL(data),"Invalid expressio");
       return;
     }
     sprintf(label_text,"%.3f",text);
@@ -113,7 +113,7 @@ void calculate(GtkWidget *widget,gpointer data)
         final = results.first / second;
         break;
       } else {
-        gtk_label_set_text(GTK_LABEL(data),"Cannot divide by 0");
+        gtk_label_set_text(GTK_LABEL(data),"Invalid expression");
         return;
       }
     case ADDI:
