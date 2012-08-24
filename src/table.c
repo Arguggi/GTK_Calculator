@@ -6,8 +6,14 @@
 #include <float.h>
 #include "table.h"
 #define LABEL_LEN 270 
+#define MULT 1
+#define DIVI 2
+#define ADDI 3
+#define SUBT 4
 
-static void square_root(GtkWidget *widget,gpointer data)
+Result results;
+
+void square_root(GtkWidget *widget,gpointer data)
 {
   gdouble text=0,result=0;
   gchar label_text[LABEL_LEN]="";
@@ -27,7 +33,7 @@ static void square_root(GtkWidget *widget,gpointer data)
   }
 }
 
-static void square(GtkWidget *widget,gpointer data)
+void square(GtkWidget *widget,gpointer data)
 {
   gdouble text=0;
   gchar label_text[LABEL_LEN]="";
@@ -72,9 +78,62 @@ void append_to_label(GtkWidget *widget,gpointer data)
   } else return;
 }
 
+void operation(GtkWidget *widget,gpointer data)
+{
+  gchar button_pressed[2];
+  
+  strncpy(button_pressed,gtk_button_get_label(GTK_BUTTON(widget)),sizeof(gchar));
+  results.first = atof(gtk_label_get_text(GTK_LABEL(data)));
+  button_pressed[1] = '\0';
+  if(button_pressed[0] == '*'){
+    results.operation = MULT;
+  } else if (button_pressed[0] == '/'){
+    results.operation = DIVI;
+  } else if (button_pressed[0] == '+'){
+    results.operation = ADDI;
+  } else {
+    results.operation = SUBT;
+  }
+
+  gtk_label_set_text(GTK_LABEL(data),"");
+}
+
+void calculate(GtkWidget *widget,gpointer data)
+{
+  gdouble final=0.0,second=0.0;
+  gchar label_text[LABEL_LEN];
+  second = atof(gtk_label_get_text(GTK_LABEL(data)));
+
+  switch(results.operation){
+    case MULT:
+      final = second * results.first;
+      break;
+    case DIVI:
+      if (second != 0.0){
+        final = results.first / second;
+        break;
+      } else {
+        gtk_label_set_text(GTK_LABEL(data),"Cannot divide by 0");
+        return;
+      }
+    case ADDI:
+      final = second + results.first;
+      break;
+    case SUBT:
+      final = results.first - second;
+      break;
+    default:
+      gtk_label_set_text(GTK_LABEL(data),"Invalid expression");
+      return;
+  }
+        
+  sprintf(label_text,"%.3f",final);
+  gtk_label_set_text(GTK_LABEL(data),label_text);
+}
+
 GtkWidget *create_table(void)
 {
-  const gchar table_buttons[4][5] = {{"789()"},{"456+-"},{"123*/"},{"0.SDC"}};
+  const gchar table_buttons[4][5] = {{"789SC"},{"456+-"},{"123*/"},{"0.DB="}};
   gint i=0,j=0;
   gchar string[5];
   GtkWidget *table, *button, *label, *frame;
@@ -93,23 +152,40 @@ GtkWidget *create_table(void)
   
   for(j=0;j<4;++j){
     for(i=0;i<5;++i){
-      if(table_buttons[j][i] != 'S' && table_buttons[j][i] != 'D' && table_buttons[j][i] != 'C'){
+      if(isdigit(table_buttons[j][i]) || table_buttons[j][i] == '.'){
         string[0] = table_buttons[j][i];
         string[1] = '\0';
         button = gtk_button_new_with_label(string);
         gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
         g_signal_connect(button,"clicked",G_CALLBACK(append_to_label),label);
+      } else if (table_buttons[j][i] == '='){ /*Calculate buttons*/
+        string[0] = table_buttons[j][i];
+        string[1] = '\0';
+        button = gtk_button_new_with_label(string);
+        gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
+        g_signal_connect(button,"clicked",G_CALLBACK(calculate),label);
+      } else if (ispunct(table_buttons[j][i])){ /*Operation buttons*/
+        string[0] = table_buttons[j][i];
+        string[1] = '\0';
+        button = gtk_button_new_with_label(string);
+        gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
+        g_signal_connect(button,"clicked",G_CALLBACK(operation),label);
       } else if (table_buttons[j][i] == 'S'){ /*Square root button*/
         strncpy(string,"SQRT\0",sizeof(gchar)*5);
         button = gtk_button_new_with_label(string);
         gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
         g_signal_connect(button,"clicked",G_CALLBACK(square_root),label);
-      } else if (table_buttons[j][i] == 'D'){                                /*Reset button*/
+      } else if (table_buttons[j][i] == 'D'){ /*Delete button*/
         strncpy(string,"DEL\0",sizeof(gchar)*5);
         button = gtk_button_new_with_label(string);
         gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
         g_signal_connect(button,"clicked",G_CALLBACK(cancel_label),label);
-      } else {
+      } else if (table_buttons[j][i] == 'B'){ /*Back button*/
+        strncpy(string,"<-\0",sizeof(gchar)*5);
+        button = gtk_button_new_with_label(string);
+        gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
+        //g_signal_connect(button,"clicked",G_CALLBACK(square),label);
+      } else { /* Square button */
         strncpy(string,"^2\0",sizeof(gchar)*5);
         button = gtk_button_new_with_label(string);
         gtk_table_attach_defaults(GTK_TABLE(table),button,i,i+1,j+1,j+2);
