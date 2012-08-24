@@ -12,7 +12,7 @@ To compile:
 
 ## Image
 
-![Example](Arguggi.github.com/GTK_Calculator/img/example.jpg)
+![Example](GTK_Calculator/img/example.jpg)
 
 ## Notes
 
